@@ -1,4 +1,3 @@
-import dayjs from 'dayjs'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { FormEventHandler, useRef, useState } from 'react'
