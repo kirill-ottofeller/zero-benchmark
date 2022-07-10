@@ -5,7 +5,8 @@ import {zero} from '@zerosecrets/zero'
 
 type Data = {
   secrets: {name: string, value: string}[]
-  timestamp: number
+  totalTime: number
+  averageTime: number
   error: string | null
 }
 
@@ -28,9 +29,20 @@ export default async function handler(
         )
   }catch(error) {
     const t2 = performance.now()
-    return res.status(200).json({error: JSON.stringify({error}, undefined, 2), secrets, timestamp: t2 - t1})
+    return res.status(200).json({
+      error: JSON.stringify({error}, undefined, 2),
+      secrets,
+      totalTime: t2 - t1,
+      averageTime: (t2 - t1) / body.counter
+    })
   }
 
   const t2 = performance.now()
-  res.status(200).json({secrets, timestamp: t2 - t1, error: null})
+
+  res.status(200).json({
+    secrets,
+    totalTime: t2 - t1,
+    averageTime: (t2 - t1) / body.counter,
+    error: null
+  })
 }

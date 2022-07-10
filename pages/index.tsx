@@ -4,7 +4,7 @@ import { FormEventHandler, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 
 const Home: NextPage = () => {
-  const [data, setData] = useState({secrets: [], timestamp: 0, error: null})
+  const [data, setData] = useState({secrets: [], totalTime: 0, averageTime: 0, error: null})
   const [isLoading, setIsLoading] = useState(false)
 
   const showSecrets: FormEventHandler<HTMLFormElement> = event => {
@@ -66,7 +66,11 @@ const Home: NextPage = () => {
             {data.secrets.map(({name, value}, index) => <li key={index}>{index + 1}. {name}: {value}</li>)}
           </ul>
 
-          <small>{data.timestamp / 1000} sec</small>
+          <div>
+            {Boolean(data.totalTime) && <small>total: {data.totalTime / 1000} sec</small>}
+            <br />
+            {Boolean(data.averageTime) && <small>average: {data.averageTime / 1000} sec</small>}
+          </div>
         </>}
       </main>
     </div>
