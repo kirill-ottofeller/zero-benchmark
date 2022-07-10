@@ -1,9 +1,31 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import Image from 'next/image'
+import { FormEventHandler, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 
 const Home: NextPage = () => {
+  const [data, setData] = useState({secrets: [], timestamp: null, error: null})
+  const [isLoading, setIsLoading] = useState(false)
+
+  const showSecrets: FormEventHandler<HTMLFormElement> = event => {
+    event.preventDefault()
+    setIsLoading(true)
+
+    fetch('api/zero-secrets', {method: "POST", body: JSON.stringify({
+      token: tokenRef.current?.value ?? '',
+      apis: apisRef.current?.value.split(',').map(api => api.trim()) ?? [],
+      counter: counterRef.current?.value ?? 0,
+    }, undefined, 2)})
+      .then(response => response.json())
+      .then(result => setData(result))
+      .catch(console.error)
+      .finally(() => setIsLoading(false))
+  }
+
+  const tokenRef = useRef<HTMLInputElement>(null)
+  const apisRef = useRef<HTMLInputElement>(null)
+  const counterRef = useRef<HTMLInputElement>(null)
+
   return (
     <div className={styles.container}>
       <Head>
@@ -13,58 +35,40 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+        <form style={{display: 'grid', rowGap: '10px'}} onSubmit={showSecrets}>
+          <label>
+            Token:
+            <input ref={tokenRef} type="text" name="token"  />
+          </label>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.tsx</code>
-        </p>
+          <label>
+            Pick:
+            <input ref={apisRef} type="text" name="apis" />
+          </label>
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+          <label>
+            Times:
+            <input ref={counterRef} type="number" name="counter" />
+          </label>
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+          <button type="submit">show secrets</button>
+        </form>
 
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
 
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
+        {isLoading && 'Loading...'}
+
+        {data.error && !isLoading && <div style={{margin: '20px', maxWidth: "80%", backgroundColor: "#999", color: "#fff", overflow: 'auto'}}>
+          <pre>{data.error}</pre>
+        </div>}
+
+        {!isLoading && <>
+          <ul>
+            {data.secrets.map(({name, value}, index) => <li key={index}>{index + 1}. {name}: {value}</li>)}
+          </ul>
+
+          <small>{data.timestamp}</small>
+        </>}
       </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
     </div>
   )
 }
