@@ -28,7 +28,7 @@ export default async function handler(
         )
   }catch(error) {
     const t2 = performance.now()
-    res.status(200).json({error: JSON.stringify({error}, undefined, 2), secrets, timestamp: t2 - t1})
+    return res.status(200).json({error: JSON.stringify({error}, undefined, 2), secrets, timestamp: t2 - t1})
   }
 
   const t2 = performance.now()

@@ -1,10 +1,11 @@
+import dayjs from 'dayjs'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { FormEventHandler, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 
 const Home: NextPage = () => {
-  const [data, setData] = useState({secrets: [], timestamp: null, error: null})
+  const [data, setData] = useState({secrets: [], timestamp: 0, error: null})
   const [isLoading, setIsLoading] = useState(false)
 
   const showSecrets: FormEventHandler<HTMLFormElement> = event => {
@@ -62,11 +63,11 @@ const Home: NextPage = () => {
         </div>}
 
         {!isLoading && <>
-          <ul>
+          <ul style={{maxHeight: '500px', overflow: 'auto'}}>
             {data.secrets.map(({name, value}, index) => <li key={index}>{index + 1}. {name}: {value}</li>)}
           </ul>
 
-          <small>{data.timestamp}</small>
+          <small>{data.timestamp / 1000} sec</small>
         </>}
       </main>
     </div>
