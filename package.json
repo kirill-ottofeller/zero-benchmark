@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@zerosecrets/zero": "~0.1.7",
+    "@zerosecrets/zero": "~0.1.9",
     "graphql": "~16.5.0",
     "next": "12.2.0",
     "react": "18.2.0",

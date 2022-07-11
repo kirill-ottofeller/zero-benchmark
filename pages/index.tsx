@@ -1,11 +1,18 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { FormEventHandler, useRef, useState } from 'react'
+import { FormEventHandler, useCallback, useEffect, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
 
 const Home: NextPage = () => {
-  const [data, setData] = useState({secrets: [], totalTime: 0, averageTime: 0, error: null})
+  const [isSequence, setIsSequence] = useState(false)
+  const [data, setData] = useState({secrets: [], totalTime: 0, averageTime: 0, medianTime: 0, error: null})
   const [isLoading, setIsLoading] = useState(false)
+
+  const toggleIsSequence = () => setIsSequence(prev => !prev)
+
+  const tokenRef = useRef<HTMLInputElement>(null)
+  const apisRef = useRef<HTMLInputElement>(null)
+  const counterRef = useRef<HTMLInputElement>(null)
 
   const showSecrets: FormEventHandler<HTMLFormElement> = event => {
     event.preventDefault()
@@ -15,16 +22,13 @@ const Home: NextPage = () => {
       token: tokenRef.current?.value ?? '',
       apis: apisRef.current?.value.split(',').map(api => api.trim()) ?? [],
       counter: counterRef.current?.value ?? 0,
+      sequence: isSequence,
     }, undefined, 2)})
       .then(response => response.json())
       .then(result => setData(result))
       .catch(console.error)
       .finally(() => setIsLoading(false))
   }
-
-  const tokenRef = useRef<HTMLInputElement>(null)
-  const apisRef = useRef<HTMLInputElement>(null)
-  const counterRef = useRef<HTMLInputElement>(null)
 
   return (
     <div className={styles.container}>
@@ -37,8 +41,13 @@ const Home: NextPage = () => {
       <main className={styles.main}>
         <form style={{display: 'grid', rowGap: '10px'}} onSubmit={showSecrets}>
           <label>
+            Sequence:
+            <input onClick={toggleIsSequence} value={isSequence ? 'on': 'off'} type="checkbox" />
+          </label>
+
+          <label>
             Token:
-            <input ref={tokenRef} type="text" name="token"  />
+            <input ref={tokenRef} type="text" name="token" />
           </label>
 
           <label>
@@ -67,9 +76,11 @@ const Home: NextPage = () => {
           </ul>
 
           <div>
-            {Boolean(data.totalTime) && <small>total: {data.totalTime / 1000} sec</small>}
+            {Boolean(data.totalTime) && <small>total: {data.totalTime} ms</small>}
             <br />
-            {Boolean(data.averageTime) && <small>average: {data.averageTime / 1000} sec</small>}
+            {Boolean(data.averageTime) && <small>average: {data.averageTime} ms</small>}
+            <br />
+            {Boolean(data.medianTime) && <small>median: {data.medianTime} ms</small>}
           </div>
         </>}
       </main>
