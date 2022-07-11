@@ -4,7 +4,7 @@ specifiers:
   '@types/node': 18.0.0
   '@types/react': 18.0.14
   '@types/react-dom': 18.0.5
-  '@zerosecrets/zero': ~0.1.7
+  '@zerosecrets/zero': ~0.1.9
   eslint: 8.19.0
   eslint-config-next: 12.2.0
   graphql: ~16.5.0
@@ -14,7 +14,7 @@ specifiers:
   typescript: 4.7.4
 
 dependencies:
-  '@zerosecrets/zero': 0.1.7_graphql@16.5.0
+  '@zerosecrets/zero': 0.1.9_graphql@16.5.0
   graphql: 16.5.0
   next: 12.2.0_biqbaboplfbrettd7655fr4n2y
   react: 18.2.0
@@ -327,8 +327,8 @@ packages:
       eslint-visitor-keys: 3.3.0
     dev: true
 
-  /@zerosecrets/zero/0.1.7_graphql@16.5.0:
-    resolution: {integrity: sha512-Embejf1iUNTMch6HvKqGkA31rt3I8x/9g3SIYZSLUu9v/BDhGOIW5eCX2Fy/DbOlQU7L8p0pbfoKsv+qU1IYPw==}
+  /@zerosecrets/zero/0.1.9_graphql@16.5.0:
+    resolution: {integrity: sha512-RgrLp2dEj4ZYd2k7YVIOs+4poEtooJ+O6IBBQcJP/CkBTGfY9+Zep0bYtt9douzBIQmWrAXI7j0OuWz+IunfKw==}
     dependencies:
       graphql-request: 4.3.0_graphql@16.5.0
     transitivePeerDependencies:
