@@ -45,8 +45,8 @@ const Home: NextPage = () => {
       return
     }
 
-    const result = (await Promise.all((await Promise.all((new Array(parseInt(counterRef.current.value))).fill(null).map(
-      () => fetch(
+    const result = (await Promise.all((new Array(parseInt(counterRef.current.value))).fill(null).map(
+      async () => await (await fetch(
         'api/zero-secrets',
 
         {
@@ -60,8 +60,8 @@ const Home: NextPage = () => {
             2
           )
         }
-      )))).map((response: Response) => response.json())
-    ))
+      )).json()))
+    )
 
     const {secrets, error, timestamps} = result.reduce((accumulator, {secrets, error, timestamp}) => ({
       secrets: accumulator['secrets'].concat(secrets),
