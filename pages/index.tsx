@@ -69,6 +69,8 @@ const Home: NextPage = () => {
       timestamps: accumulator['timestamps'].concat([timestamp])
     }), {secrets: [], error: null, timestamps: []})
 
+    console.log(secrets)
+
     setError(error)
     setData(secrets)
     setTimestamps(timestamps)
