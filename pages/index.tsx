@@ -1,11 +1,34 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { FormEventHandler, useCallback, useEffect, useRef, useState } from 'react'
+import { FormEventHandler, useRef, useState } from 'react'
 import styles from '../styles/Home.module.css'
+
+const calcMedian = (list: number[]) => {
+  if(list.length === 0) {
+    return 0
+  }
+
+  const sortedList = list.sort((left, right) => left - right)
+  const half = Math.floor(sortedList.length / 2)
+
+  if(list.length % 2 !== 0) {
+    return list[half]
+  }
+
+  return (list[half - 1] + list[half]) / 2
+}
+
+const sum = (list: number[]) => list.reduce((result, item) => result + item, 0)
+
+const calcAverage = (list: number[]) => (
+  sum(list) / list.length
+)
 
 const Home: NextPage = () => {
   const [isSequence, setIsSequence] = useState(false)
-  const [data, setData] = useState({secrets: [], totalTime: 0, averageTime: 0, medianTime: 0, error: null})
+  const [error, setError] = useState<string | null>(null)
+  const [data, setData] = useState<{name: string, value: string}[]>([]);
+  const [timestamps, setTimestamps] = useState<number[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   const toggleIsSequence = () => setIsSequence(prev => !prev)
@@ -14,20 +37,41 @@ const Home: NextPage = () => {
   const apisRef = useRef<HTMLInputElement>(null)
   const counterRef = useRef<HTMLInputElement>(null)
 
-  const showSecrets: FormEventHandler<HTMLFormElement> = event => {
+  const showSecrets: FormEventHandler<HTMLFormElement> = async event => {
     event.preventDefault()
     setIsLoading(true)
 
-    fetch('api/zero-secrets', {method: "POST", body: JSON.stringify({
-      token: tokenRef.current?.value ?? '',
-      apis: apisRef.current?.value.split(',').map(api => api.trim()) ?? [],
-      counter: counterRef.current?.value ?? 0,
-      sequence: isSequence,
-    }, undefined, 2)})
-      .then(response => response.json())
-      .then(result => setData(result))
-      .catch(console.error)
-      .finally(() => setIsLoading(false))
+    if(!counterRef.current) {
+      return
+    }
+
+    const resultSecrets = []
+    const resultTimestamps = []
+
+    for (let i = 0; i < parseInt(counterRef.current.value); i++) {
+      try {
+        const {secrets, error, timestamp} = ((await (await fetch('api/zero-secrets', {method: "POST", body: JSON.stringify({
+          token: tokenRef.current?.value ?? '',
+          apis: apisRef.current?.value.split(',').map(api => api.trim()) ?? [],
+        }, undefined, 2)})
+        ).json()))
+
+        if(error) {
+          setError(error)
+          throw new Error(error)
+        }
+
+        resultSecrets.push(...secrets)
+        resultTimestamps.push(timestamp)
+      } catch(error) {
+        setIsLoading(false)
+        console.error(error)
+      }
+    }
+
+    setIsLoading(false)
+    setData(resultSecrets)
+    setTimestamps(resultTimestamps)
   }
 
   return (
@@ -63,24 +107,23 @@ const Home: NextPage = () => {
           <button type="submit">show secrets</button>
         </form>
 
-
         {isLoading && 'Loading...'}
 
-        {data.error && !isLoading && <div style={{margin: '20px', maxWidth: "80%", backgroundColor: "#999", color: "#fff", overflow: 'auto'}}>
-          <pre>{data.error}</pre>
+        {error && !isLoading && <div style={{margin: '20px', maxWidth: "80%", backgroundColor: "#999", color: "#fff", overflow: 'auto'}}>
+          <pre>{error}</pre>
         </div>}
 
         {!isLoading && <>
           <ul style={{maxHeight: '500px', overflow: 'auto'}}>
-            {data.secrets.map(({name, value}, index) => <li key={index}>{index + 1}. {name}: {value}</li>)}
+            {data.map(({name, value}, index) => <li key={index}>{index + 1}. {name}: {value}</li>)}
           </ul>
 
           <div>
-            {Boolean(data.totalTime) && <small>total: {data.totalTime} ms</small>}
+            <small>total: {sum(timestamps)} ms</small>
             <br />
-            {Boolean(data.averageTime) && <small>average: {data.averageTime} ms</small>}
+            <small>average: {calcAverage(timestamps)} ms</small>
             <br />
-            {Boolean(data.medianTime) && <small>median: {data.medianTime} ms</small>}
+            <small>median: {calcMedian(timestamps)} ms</small>
           </div>
         </>}
       </main>
