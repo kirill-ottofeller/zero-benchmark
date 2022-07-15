@@ -45,36 +45,33 @@ const Home: NextPage = () => {
       return
     }
 
-    const result = (await Promise.all((new Array(parseInt(counterRef.current.value))).fill(null).map(
-      async () => await (await fetch(
-        'api/zero-secrets',
+    const resultSecrets = []
+    const resultTimestamps = []
 
-        {
-          method: "POST",
-          body: JSON.stringify(
-            {
-              token: tokenRef.current?.value ?? '',
-              apis: apisRef.current?.value.split(',').map(api => api.trim()) ?? [],
-            },
-            undefined,
-            2
-          )
+    for (let i = 0; i < parseInt(counterRef.current.value); i++) {
+      try {
+        const {secrets, error, timestamp} = ((await (await fetch('api/zero-secrets', {method: "POST", body: JSON.stringify({
+          token: tokenRef.current?.value ?? '',
+          apis: apisRef.current?.value.split(',').map(api => api.trim()) ?? [],
+        }, undefined, 2)})
+        ).json()))
+
+        if(error) {
+          setError(error)
+          throw new Error(error)
         }
-      )).json()))
-    )
 
-    const {secrets, error, timestamps} = result.reduce((accumulator, {secrets, error, timestamp}) => ({
-      secrets: accumulator['secrets'].concat(secrets),
-      error: accumulator['error'] ?? error,
-      timestamps: accumulator['timestamps'].concat([timestamp])
-    }), {secrets: [], error: null, timestamps: []})
+        resultSecrets.push(...secrets)
+        resultTimestamps.push(timestamp)
+      } catch(error) {
+        setIsLoading(false)
+        console.error(error)
+      }
+    }
 
-    console.log(secrets)
-
-    setError(error)
-    setData(secrets)
-    setTimestamps(timestamps)
     setIsLoading(false)
+    setData(resultSecrets)
+    setTimestamps(resultTimestamps)
   }
 
   return (
