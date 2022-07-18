@@ -1,3 +1,4 @@
+import { responsePathAsArray } from 'graphql'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { FormEventHandler, useRef, useState } from 'react'
@@ -40,38 +41,28 @@ const Home: NextPage = () => {
   const showSecrets: FormEventHandler<HTMLFormElement> = async event => {
     event.preventDefault()
     setIsLoading(true)
+    setData([])
 
     if(!counterRef.current) {
       return
     }
 
-    const resultSecrets = []
-    const resultTimestamps = []
-
-    for (let i = 0; i < parseInt(counterRef.current.value); i++) {
-      try {
-        const {secrets, error, timestamp} = ((await (await fetch('api/zero-secrets', {method: "POST", body: JSON.stringify({
-          token: tokenRef.current?.value ?? '',
-          apis: apisRef.current?.value.split(',').map(api => api.trim()) ?? [],
-        }, undefined, 2)})
-        ).json()))
-
-        if(error) {
-          setError(error)
-          throw new Error(error)
-        }
-
-        resultSecrets.push(...secrets)
-        resultTimestamps.push(timestamp)
-      } catch(error) {
-        setIsLoading(false)
-        console.error(error)
-      }
+    if(!tokenRef.current) {
+      return
     }
 
-    setIsLoading(false)
-    setData(resultSecrets)
-    setTimestamps(resultTimestamps)
+    if(!apisRef.current) {
+      return
+    }
+
+    fetch('/api/zero-secrets', {method: 'POST', body:JSON.stringify({
+      token: tokenRef.current.value,
+      apis: apisRef.current.value.split(','),
+      counter: counterRef.current.value,
+    }, undefined, 2)}).then(response => response.json()).then(({secrets}) => {
+        setIsLoading(false)
+        setData(secrets)
+    }).catch(error => setError(error))
   }
 
   return (
