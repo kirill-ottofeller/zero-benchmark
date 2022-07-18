@@ -11,11 +11,12 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  const body = JSON.parse(req.body)
   const t1 = performance.now()
   let secrets: Data['secrets'] = []
 
   try {
-    secrets = (await Promise.all((await Promise.all(new Array(100).fill(null).map(
+    secrets = (await Promise.all((await Promise.all(new Array(parseInt(body.counter)).fill(null).map(
       () => fetch(
         'https://core.tryzero.com/v1/graphql',
         {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({"query":"query {\n\tsecrets(zeroToken: \"4242dc44-76dc-4f1a-99af-84e0176daac6\", pick: [\"token-for-token-4\"]) {\n\t\tid\n\t\tname\n\n\t\tfields {\n\t\t\tname\n\t\t\tvalue\n\t\t}\n\t}\n}\n"}, undefined, 2)}
